@@ -312,9 +312,19 @@ def ensure_env(env_name: str) -> Path:
 def main(target_env_name: str, remove_shortcut: bool=False) -> Union[int, None]:
     if not in_base_env():
         LOGGER.warning("Not in base environment. Re-running this script from the base environment")
+
+        # I don't know why, but Windows *really* does not want to resolve conda in PATH if you aren't in the base environment
+        try:
+            conda_exe = environ["CONDA_EXE"]
+        except KeyError:
+            try:
+                conda_exe = environ["_CONDA_EXE"]
+            except KeyError:
+                conda_exe = "conda"
+
         # call conda run to re-run this in the base prefix
         rerun_proces = run(
-            ["conda", "run", "--prefix", str(get_base_prefix()), "--no-capture-output", "python", *argv],
+            [conda_exe, "run", "--prefix", str(get_base_prefix()), "--no-capture-output", "python", *argv],
             capture_output=False,
             check=False
         )

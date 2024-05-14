@@ -15,9 +15,18 @@
             "icon": "{{ MENU_DIR }}/jupyterlab.{{ ICON_EXT }}",
             "platforms": {
                 "win": {
-                    "file_extensions": [
-                        ".ipynb"
-                    ],
+                    "precreate": "{{ BASE_PREFIX }}\\condabin\\conda.bat init cmd.exe",
+                    "command": [
+                        "{{ BASE_PREFIX }}\\condabin\\conda.bat",
+                        "run",
+                        "--live-stream",
+                        "--prefix",
+                        "{{ PREFIX }}",
+                        "jupyter",
+                         "lab",
+                         "--config={{ MENU_DIR }}/jupyter_lab_config.py"
+                     ],
+                    "activate": false,
                     "quicklaunch": false
                 },
                 "osx": {
