@@ -1,0 +1,56 @@
+{
+    "menu_name": "{{ DISTRIBUTION_NAME }}",
+    "menu_items": [
+        {
+            "name": "JupyterLab",
+            "description": "Interactive Python Notebook",
+            "command": [
+               "jupyter",
+                "lab",
+                "--config={{ MENU_DIR }}/jupyter_lab_config.py"
+            ],
+            "activate": true,
+            "terminal": true,
+            "working_dir": "{{ HOME }}",
+            "icon": "{{ MENU_DIR }}/jupyterlab.{{ ICON_EXT }}",
+            "platforms": {
+                "win": {
+                    "file_extensions": [
+                        ".ipynb"
+                    ],
+                    "quicklaunch": false
+                },
+                "osx": {
+                    "CFBundleSpokenName": "Jupiter lab",
+                    "entitlements": [
+                        "com.apple.security.cs.allow-dyld-environment-variables",
+                        "com.apple.security.cs.disable-library-validation",
+                        "com.apple.security.cs.allow-jit",
+                        "com.apple.security.cs.allow-unsigned-executable-memory",
+                        "com.apple.security.cs.debugger",
+                        "com.apple.security.network.client",
+                        "com.apple.security.network.server",
+                        "com.apple.security.files.user-selected.read-only",
+                        "com.apple.security.inherit",
+                        "com.apple.security.automation.apple-events"
+                    ]
+                },
+                "linux":{
+                    "Categories": [
+                        "Development",
+                        "Science"
+                    ],
+                    "Keywords": [
+                        "python",
+                        "jupyter",
+                        "notebook"
+                    ],
+                    "GenericName": "Interactive Python Notebook",
+                    "MimeType": [
+                        "application/x-ipynb+json"
+                    ]
+                }
+            }
+        }
+    ]
+}
