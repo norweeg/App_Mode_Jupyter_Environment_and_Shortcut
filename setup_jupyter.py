@@ -31,7 +31,7 @@ def get_current_prefix() -> Path:
             current_prefix = Path(environ["_CONDA_PREFIX"])
         except KeyError as e:
             raise RuntimeError("No active conda environment detected. Please activate your base conda environment") from e
-    
+
     LOGGER.debug(f"Current prefix is {current_prefix}")
 
     return current_prefix
@@ -50,7 +50,7 @@ def get_base_prefix() -> Path:
 
     # your base environment will be the grandparent of the conda executable
     return conda_exe.parents[1]
-    
+
 
 def get_menuinst_version() -> tuple[str, str, str]:
     conda_process = run(["conda", "list", "--prefix", str(get_base_prefix()), "--json"], capture_output=True, check=True)
@@ -59,13 +59,13 @@ def get_menuinst_version() -> tuple[str, str, str]:
         conda_pkgs = loads(conda_process.stdout)
     except JSONDecodeError as decode_exception:
         raise JSONDecodeError(f"Error parsing conda output as JSON: {decode_exception}") from decode_exception
-    
+
     for pkg in conda_pkgs:
         if pkg["name"] == "menuinst":
             break
     else:
         raise RuntimeError("menuinst was not found in the base conda envirionment")
-    
+
     LOGGER.debug(f"menuinst=={pkg['version']} found")
 
     return pkg["version"].split(".")
@@ -74,7 +74,7 @@ def get_menuinst_version() -> tuple[str, str, str]:
 def in_base_env() -> bool:
     return get_current_prefix().samefile(get_base_prefix())
 
-        
+
 def menuinst_gt_v2_present() -> bool:
     major, minor, patch = get_menuinst_version()
 
@@ -89,7 +89,7 @@ def stage_configs(destination_dir: Path) -> Path:
     repo_dir = Path(__file__).parent
     shortcut_json = repo_dir / "jupyterlab_shortcut.json"
     jupyterlab_config = repo_dir / "jupyter_lab_config.py"
-    
+
     LOGGER.debug(f"Repository directory is {repo_dir}")
     LOGGER.debug(f"menuinst spec json file is {shortcut_json}")
     LOGGER.debug(f"JupyterLab config file is {jupyterlab_config}")
@@ -153,14 +153,14 @@ def svg_to_icns(svg_file: PathLike) -> None:
     with TemporaryDirectory() as temp_dir:
         iconset_dir = Path(temp_dir)/"jupyterlab.iconset"
         iconset_dir.mkdir(exist_ok=True)
-        
+
         for size in [2**n for n in range(4, 11)]:
             outfile = iconset_dir/f"icon_{size}x{size}.png"
             try:
                 run(
                     [
                         "qlmanage",
-                        "-t", 
+                        "-t",
                         "-s",
                         str(size),
                         "-o",
@@ -281,9 +281,9 @@ def ensure_env(env_name: str) -> Path:
                     end=linesep,
                     file=condarc
                 )
-            
+
         else:
-            # add minimal new jupyter packages t existing environment 
+            # add minimal new jupyter packages t existing environment
             pkgs = {pkg["name"] for pkg in env_spec}
 
             missing_pkgs = {"jupyterlab", "nb_conda_kernels", "ipykernel"} - pkgs
@@ -306,7 +306,7 @@ def ensure_env(env_name: str) -> Path:
 
         (env_prefix/"Menu").mkdir(exist_ok=True)
 
-        return env_prefix            
+        return env_prefix
 
 
 def main(target_env_name: str, remove_shortcut: bool=False) -> Union[int, None]:
@@ -331,10 +331,10 @@ def main(target_env_name: str, remove_shortcut: bool=False) -> Union[int, None]:
             run(["python", *argv], capture_output=False, check=True)
     elif meets_prerequisites() and remove_shortcut:
         from menuinst.api import remove
-        
+
         target_prefix = get_base_prefix() / f"envs/{target_env_name}"
         menu_dir = target_prefix / "Menu"
-        
+
         shortcut_json = menu_dir / "jupyterlab_shortcut.json"
         jupyterlab_config = menu_dir / "jupyter_lab_config.py"
         match platform.system():
@@ -346,10 +346,10 @@ def main(target_env_name: str, remove_shortcut: bool=False) -> Union[int, None]:
                 icon_file = menu_dir/"jupyterlab.ico"
             case _:
                 raise RuntimeError(f"{platform.system()} is not a supported platform")
-            
+
         if shortcut_json.is_file():
             LOGGER.debug("Removing JupyterLab shortcut")
-            try:    
+            try:
                 remove(shortcut_json, target_prefix=target_prefix)
             except:
                 pass
@@ -357,7 +357,7 @@ def main(target_env_name: str, remove_shortcut: bool=False) -> Union[int, None]:
                 LOGGER.info("JupyterLab shortcut removed")
         else:
             LOGGER.error(f"Shortcut spec file '{shortcut_json}' does not exist, therefore the shotcut cannot be removed by this script. Please delete it manually")
-        
+
         if menu_dir.exists() and menu_dir.is_dir():
             LOGGER.debug(f"Cleaning up {target_env_name} environment's Menu directory {menu_dir}")
             jupyterlab_config.unlink(missing_ok=True)
@@ -424,7 +424,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "name",
         help = "Name of the target conda environment containing JupyterLab. If it does not exist, one will be created"
-    )    
+    )
 
     args = parser.parse_args()
 
@@ -442,6 +442,7 @@ if __name__ == "__main__":
     logging.captureWarnings(True)
 
     try:
+        logging.info("Creating Jupyterlab shortcut.  This may take a moment...")
         exit(main(args.name, args.remove))
     except CalledProcessError as e:
         # catch any exceptions raised if calling conda returns an unsuccessful return code
